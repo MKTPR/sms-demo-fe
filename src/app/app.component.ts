@@ -19,7 +19,7 @@ export class AppComponent {
     axios
       .post('https://sms-demo-fszn.onrender.com/send-sms', {
         phoneNumber,
-        message: 'Sent from clinicallyAI',
+        message: 'ClinicallyAI',
       })
       .then((response) => {
         alert('SMS Sent Successfully!');
