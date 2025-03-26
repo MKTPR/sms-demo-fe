@@ -16,18 +16,15 @@ export class AppComponent {
   ];
 
   sendSms(phoneNumber: string) {
-    console.log('sending......');
     axios
       .post('https://sms-demo-fszn.onrender.com/send-sms', {
         phoneNumber,
         message: 'Hello, this is a test SMS!',
       })
       .then((response) => {
-        console.log(response);
         alert('SMS Sent Successfully!');
       })
       .catch((error) => {
-        console.log(error);
         alert('Error sending SMS: ' + error.message);
       });
   }
