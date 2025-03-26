@@ -1,13 +1,34 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import axios from 'axios';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  imports: [CommonModule],
+  styleUrls: ['./app.component.css'],
+  standalone: true,
 })
 export class AppComponent {
-  title = 'frontend';
+  users = [
+    { name: 'John Doe', phone: '64210391408' },
+    { name: 'Jane Smith', phone: '+0987654321' },
+  ];
+
+  sendSms(phoneNumber: string) {
+    console.log('sending......');
+    axios
+      .post('https://sms-demo-fszn.onrender.com/send-sms', {
+        phoneNumber,
+        message: 'Hello, this is a test SMS!',
+      })
+      .then((response) => {
+        console.log(response);
+        alert('SMS Sent Successfully!');
+      })
+      .catch((error) => {
+        console.log(error);
+        alert('Error sending SMS: ' + error.message);
+      });
+  }
 }
