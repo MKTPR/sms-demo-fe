@@ -1,0 +1,45 @@
+/* Ensure table layout is stable */
+table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+/* Ensure all cells have equal height and proper vertical alignment */
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border: 1px solid #ddd;
+  height: 30px; /* Set a fixed height for all cells */
+  vertical-align: middle; /* Align content to the middle */
+}
+
+/* Ensure dropdowns and inputs stretch properly inside the cell */
+td select,
+td input {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Make the dropdown and input container flex to avoid wrapping */
+.date-container {
+  display: flex;
+  align-items: center; /* Aligns dropdowns in the middle */
+  gap: 5px;
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+/* Ensure dropdowns do not shrink and align properly */
+.date-container select {
+  flex: 1;
+  min-width: 50px;
+  height: 100%; /* Ensures it takes full cell height */
+}
+
+.button-add-row {
+  margin-left: 10px;
+  margin-top: 10px;
+}
