@@ -1,18 +1,90 @@
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Phone Number</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let user of users">
-      <td>{{ user.name }}</td>
-      <td>{{ user.phone }}</td>
-      <td>
-        <button (click)="sendSms(user.phone)">Send SMS</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<div style="justify-items: center">
+  <h2>Vaccination Management</h2>
+  <form [formGroup]="form">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date of Birth</th>
+          <th>Contact Number</th>
+          <th>Vaccine Type</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody formArrayName="vaccinations">
+        <tr
+          *ngFor="let row of vaccinationControls.controls; let i = index"
+          [formGroupName]="i"
+        >
+          <td><input type="text" formControlName="name" /></td>
+
+          <!-- Date of Birth (Horizontal layout) -->
+          <td class="date-container">
+            <select formControlName="dobDay">
+              <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+            </select>
+            <select formControlName="dobMonth">
+              <option *ngFor="let month of months" [value]="month.value">
+                {{ month.label }}
+              </option>
+            </select>
+            <select formControlName="dobYear">
+              <option *ngFor="let year of dobYears" [value]="year">
+                {{ year }}
+              </option>
+            </select>
+          </td>
+
+          <td><input type="text" formControlName="contact" /></td>
+
+          <td>
+            <select
+              formControlName="vaccineType"
+              (change)="onChangeVaccineType(i)"
+            >
+              <option value="HPV 1st">HPV 1st</option>
+              <option value="HPV 2nd">HPV 2nd</option>
+              <option value="HPV 3rd">HPV 3rd</option>
+            </select>
+          </td>
+
+          <!-- Due Date (Horizontal layout) -->
+          <td class="date-container">
+            <select formControlName="dueDay">
+              <option *ngFor="let day of days" [value]="day">{{ day }}</option>
+            </select>
+            <select formControlName="dueMonth">
+              <option *ngFor="let month of months" [value]="month.value">
+                {{ month.label }}
+              </option>
+            </select>
+            <select formControlName="dueYear">
+              <option *ngFor="let year of dueYears" [value]="year">
+                {{ year }}
+              </option>
+            </select>
+          </td>
+
+          <td>
+            <select formControlName="status">
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </td>
+
+          <td>
+            <button *ngIf="!row.get('sent')?.value" (click)="sendSms(i)">
+              Send SMS
+            </button>
+            <button *ngIf="row.get('sent')?.value" disabled>SMS Sent</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" class="button-add-row" (click)="addRow()">
+      Add Row
+    </button>
+  </form>
+</div>
