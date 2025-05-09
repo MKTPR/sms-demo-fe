@@ -1,118 +1,191 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
-  FormArray,
-  FormControl,
+  FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { CommonModule } from '@angular/common';
 import axios from 'axios';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, NgxSpinnerModule],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
-  form = new FormGroup({
-    vaccinations: new FormArray([
-      new FormGroup({
-        name: new FormControl(''),
-        dobDay: new FormControl('1'),
-        dobMonth: new FormControl('1'),
-        dobYear: new FormControl('2000'),
-        contact: new FormControl(''),
-        vaccineType: new FormControl('HPV 1st'),
-        dueDay: new FormControl('1'),
-        dueMonth: new FormControl('1'),
-        dueYear: new FormControl('2025'),
-        status: new FormControl('Pending'),
-        sent: new FormControl(false),
-      }),
-    ]),
-  });
+export class AppComponent implements OnInit {
+  tab: 'add' | 'view' | 'edit' = 'add';
 
-  days = Array.from({ length: 31 }, (_, i) => i + 1);
-  months = [
-    { value: '1', label: 'Jan' },
-    { value: '2', label: 'Feb' },
-    { value: '3', label: 'Mar' },
-    { value: '4', label: 'Apr' },
-    { value: '5', label: 'May' },
-    { value: '6', label: 'Jun' },
-    { value: '7', label: 'Jul' },
-    { value: '8', label: 'Aug' },
-    { value: '9', label: 'Sep' },
-    { value: '10', label: 'Oct' },
-    { value: '11', label: 'Nov' },
-    { value: '12', label: 'Dec' },
-  ];
-  dobYears = Array.from({ length: 50 }, (_, i) => 1976 + i);
-  dueYears = Array.from({ length: 5 }, (_, i) => 2024 + i);
+  addForm!: FormGroup;
+  editForm!: FormGroup;
 
-  get vaccinationControls() {
-    return this.form.get('vaccinations') as FormArray;
+  records!: Array<{
+    id: String;
+    patientName: String;
+    nhiNumber: String;
+    contactNumber: String;
+    vaccineType: String;
+    dueDate: Date;
+    reminderStatus: String;
+    vaccinatedDate: Date;
+  }>;
+
+  get addFrm() {
+    return this.addForm.controls;
   }
 
-  addRow() {
-    this.vaccinationControls.push(
-      new FormGroup({
-        name: new FormControl(''),
-        dobDay: new FormControl('1'),
-        dobMonth: new FormControl('1'),
-        dobYear: new FormControl('2000'),
-        contact: new FormControl(''),
-        vaccineType: new FormControl('HPV 1st'),
-        dueDay: new FormControl('1'),
-        dueMonth: new FormControl('1'),
-        dueYear: new FormControl('2025'),
-        status: new FormControl('Pending'),
-        sent: new FormControl(false),
-      })
-    );
+  get editFrm() {
+    return this.editForm.controls;
   }
 
-  onChangeVaccineType(index: number) {
-    const row = this.vaccinationControls.at(index);
+  constructor(private fb: FormBuilder, private spinner: NgxSpinnerService) {}
 
-    const today = new Date();
-    const futureDate = new Date();
-    futureDate.setMonth(today.getMonth() + 6);
+  ngOnInit() {
+    this.addForm = this.fb.group({
+      patientName: [null, Validators.required],
+      nhiNumber: [null, Validators.required],
+      contactNumber: [null, Validators.required],
+      vaccineType: [null, Validators.required],
+      dueDate: [null, Validators.required],
+    });
+    this.editForm = this.fb.group({
+      id: [null, Validators.required],
+      patientName: [null, Validators.required],
+      nhiNumber: [null, Validators.required],
+      contactNumber: [null, Validators.required],
+      vaccineType: [null, Validators.required],
+      dueDate: [null, Validators.required],
+      reminderStatus: [null, Validators.required],
+      vaccinatedDate: [null],
+    });
 
-    const day = futureDate.getDate();
-    const month = futureDate.getMonth() + 1; // Months are 0-indexed
-    const year = futureDate.getFullYear();
-    console.log(year);
-
-    row.patchValue({ dueDay: day });
-    row.patchValue({ dueMonth: month });
-    row.patchValue({ dueYear: year });
+    this.populateRecords();
   }
 
-  sendSms(index: number) {
-    const row = this.vaccinationControls.at(index);
-    console.log('Sending SMS to:', row.value.contact);
-    if (!row.value.contact) return;
-    axios
-      .post('https://sms-demo-fszn.onrender.com/send-sms', {
-        phoneNumber: row.value.contact,
-        message: `Hi ${row.value.name}
+  private resetForm() {
+    this.addForm.reset({
+      patientName: null,
+      nhiNumber: null,
+      contactNumber: null,
+      vaccineType: null,
+      dueDate: null,
+    });
+    this.editForm.reset({
+      patientName: null,
+      nhiNumber: null,
+      contactNumber: null,
+      vaccineType: null,
+      dueDate: null,
+      reminderStatus: null,
+      vaccinatedDate: null,
+    });
+  }
 
-You're one step closer to full ${row.value.vaccineType} protection!
-Your second dose is due.
-Book your appointment at www.pakurangaUniChem.com or walk in anytime
+  private async populateRecords() {
+    try {
+      const response = await axios.get(
+        'https://sms-demo-fszn.onrender.com/vaccine-records'
+      );
+      this.records = response.data.rows.map((record: any) => ({
+        id: record.id,
+        patientName: record.patient_name,
+        nhiNumber: record.nhi_number,
+        contactNumber: record.contact_number,
+        vaccineType: record.vaccine_type,
+        dueDate: new Date(record.due_date),
+        reminderStatus: record.reminder_status,
+        vaccinatedDate: record.vaccinated_date
+          ? new Date(record.vaccinated_date)
+          : null,
+      }));
+    } catch (error) {
+      console.error('Error loading vaccine records:', error);
+    }
+  }
 
-Kind regards,
-Pakuranga Unichem`,
-      })
-      .then((response) => {
-        alert('SMS Sent Successfully!');
-        row.patchValue({ sent: true });
-      })
-      .catch((error) => {
-        alert('Error sending SMS: ' + error.message);
-      });
+  onClickAddPatient() {
+    this.tab = 'add';
+  }
+
+  onClickViewAllRecords() {
+    this.tab = 'view';
+  }
+
+  onClickEditRecord(record: any) {
+    this.tab = 'edit';
+    this.editForm.patchValue({
+      id: record.id,
+      patientName: record.patientName,
+      nhiNumber: record.nhiNumber,
+      contactNumber: record.contactNumber,
+      vaccineType: record.vaccineType,
+      dueDate: record.dueDate?.toISOString().split('T')[0],
+      reminderStatus: record.reminderStatus,
+      vaccinatedDate: record.vaccinatedDate?.toISOString().split('T')[0],
+    });
+  }
+
+  onClickCancel() {
+    this.tab = 'view';
+    this.resetForm();
+  }
+
+  async onSubmitAddForm() {
+    this.spinner.show();
+    const payload = {
+      patientName: this.addFrm['patientName'].value,
+      nhiNumber: this.addFrm['nhiNumber'].value,
+      contactNumber: this.addFrm['contactNumber'].value,
+      vaccineType: this.addFrm['vaccineType'].value,
+      dueDate: this.addFrm['dueDate'].value,
+      reminderStatus: 'Scheduled',
+    };
+
+    try {
+      const response = await axios.post(
+        'https://sms-demo-fszn.onrender.com/vaccine-records',
+        payload
+      );
+      alert(response.data.message);
+      this.spinner.hide();
+      this.resetForm();
+      this.populateRecords();
+      this.onClickViewAllRecords();
+    } catch (error: any) {
+      alert('Error scheduling SMS: ' + error.message);
+      this.spinner.hide();
+    }
+  }
+
+  async onSubmitEditForm() {
+    this.spinner.show();
+    const payload = {
+      id: this.editFrm['id'].value,
+      patientName: this.editFrm['patientName'].value,
+      nhiNumber: this.editFrm['nhiNumber'].value,
+      contactNumber: this.editFrm['contactNumber'].value,
+      vaccineType: this.editFrm['vaccineType'].value,
+      dueDate: this.editFrm['dueDate'].value,
+      reminderStatus: this.editFrm['reminderStatus'].value,
+      vaccinatedDate: this.editFrm['vaccinatedDate'].value,
+    };
+
+    try {
+      const response = await axios.post(
+        'https://sms-demo-fszn.onrender.com/vaccine-records',
+        payload
+      );
+      alert(response.data.message);
+      this.resetForm();
+      this.populateRecords();
+      this.onClickViewAllRecords();
+      this.spinner.hide();
+    } catch (error: any) {
+      alert('Error scheduling SMS: ' + error.message);
+      this.spinner.hide();
+    }
   }
 }

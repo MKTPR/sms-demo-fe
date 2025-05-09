@@ -1,90 +1,380 @@
-<div style="justify-items: center">
-  <h2>Vaccination Management</h2>
-  <form [formGroup]="form">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Date of Birth</th>
-          <th>Contact Number</th>
-          <th>Vaccine Type</th>
-          <th>Due Date</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody formArrayName="vaccinations">
-        <tr
-          *ngFor="let row of vaccinationControls.controls; let i = index"
-          [formGroupName]="i"
+<ngx-spinner type="ball-scale-multiple"></ngx-spinner>
+<body>
+  <header>
+    <h1>Pharmacy Vaccination Reminder System</h1>
+  </header>
+
+  <!-- Everything -->
+  <div class="container">
+    <!-- Tab box -->
+    <div class="tab-container">
+      <!-- Tabs -->
+      <div class="tabs">
+        <div
+          class="tab"
+          [class.active]="tab === 'add'"
+          (click)="onClickAddPatient()"
         >
-          <td><input type="text" formControlName="name" /></td>
+          Add New Patient
+        </div>
+        <div
+          class="tab"
+          [class.active]="tab === 'view' || tab === 'edit'"
+          (click)="onClickViewAllRecords()"
+        >
+          View All Records
+        </div>
+      </div>
+    </div>
 
-          <!-- Date of Birth (Horizontal layout) -->
-          <td class="date-container">
-            <select formControlName="dobDay">
-              <option *ngFor="let day of days" [value]="day">{{ day }}</option>
-            </select>
-            <select formControlName="dobMonth">
-              <option *ngFor="let month of months" [value]="month.value">
-                {{ month.label }}
-              </option>
-            </select>
-            <select formControlName="dobYear">
-              <option *ngFor="let year of dobYears" [value]="year">
-                {{ year }}
-              </option>
-            </select>
-          </td>
-
-          <td><input type="text" formControlName="contact" /></td>
-
-          <td>
-            <select
-              formControlName="vaccineType"
-              (change)="onChangeVaccineType(i)"
+    <!-- Form box -->
+    <div class="form-container" *ngIf="tab === 'add'" id="addPatientForm">
+      <h2>Set up new reminder</h2>
+      <!-- Forms -->
+      <form [formGroup]="addForm" (ngSubmit)="onSubmitAddForm()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="patientName">Patient Name*</label>
+            <input type="text" formControlName="patientName" required />
+            <div
+              class="form-error"
+              *ngIf="
+                addFrm.patientName.errors?.required &&
+                addFrm.patientName.touched
+              "
             >
-              <option value="HPV 1st">HPV 1st</option>
-              <option value="HPV 2nd">HPV 2nd</option>
-              <option value="HPV 3rd">HPV 3rd</option>
-            </select>
-          </td>
+              Name is required
+            </div>
+          </div>
 
-          <!-- Due Date (Horizontal layout) -->
-          <td class="date-container">
-            <select formControlName="dueDay">
-              <option *ngFor="let day of days" [value]="day">{{ day }}</option>
-            </select>
-            <select formControlName="dueMonth">
-              <option *ngFor="let month of months" [value]="month.value">
-                {{ month.label }}
-              </option>
-            </select>
-            <select formControlName="dueYear">
-              <option *ngFor="let year of dueYears" [value]="year">
-                {{ year }}
-              </option>
-            </select>
-          </td>
+          <div class="form-group">
+            <label for="nhiNumber">NHI Number*</label>
+            <input
+              type="text"
+              formControlName="nhiNumber"
+              placeholder="e.g. ABC1234"
+              required
+            />
+            <div
+              class="form-error"
+              *ngIf="
+                addFrm.nhiNumber.errors?.required && addFrm.nhiNumber.touched
+              "
+            >
+              NHI number is required
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactNumber">Contact Number*</label>
+            <input
+              type="tel"
+              formControlName="contactNumber"
+              placeholder="e.g. 021 123 4567"
+              required
+            />
+            <div
+              class="form-error"
+              *ngIf="
+                addFrm.contactNumber.errors?.required &&
+                addFrm.contactNumber.touched
+              "
+            >
+              Contact number is required
+            </div>
+          </div>
 
-          <td>
-            <select formControlName="status">
-              <option value="Pending">Pending</option>
-              <option value="Completed">Completed</option>
+          <div class="form-group">
+            <label for="vaccineType">Vaccine Type*</label>
+            <select formControlName="vaccineType" required>
+              <option value="" disabled selected>Select vaccine...</option>
+              <option value="Anti-D">Anti-D</option>
+              <option value="COVID">COVID</option>
+              <option value="Flu">Flu</option>
+              <option value="HPV2">HPV (2nd dose)</option>
+              <option value="HPV3">HPV (3rd dose)</option>
+              <option value="Measles">Measles</option>
+              <option value="Meningococcal">Meningococcal</option>
+              <option value="MMR">MMR</option>
+              <option value="Shingles">Shingles</option>
+              <option value="Child6wks">Child (6 wks)</option>
+              <option value="Child3mths">Child (3 mths)</option>
+              <option value="Child5mths">Child (5 mths)</option>
+              <option value="Child12mths">Child (12 mths)</option>
+              <option value="Child15mths">Child (15 mths)</option>
+              <option value="Child4yrs">Child (4 yrs)</option>
+              <option value="Child11-12yrs">Child (11-12yrs)</option>
             </select>
-          </td>
-
-          <td>
-            <button *ngIf="!row.get('sent')?.value" (click)="sendSms(i)">
-              Send SMS
+            <div
+              class="form-error"
+              *ngIf="
+                addFrm.vaccineType.errors?.required &&
+                addFrm.vaccineType.touched
+              "
+            >
+              Vaccine type is required
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dueDate">Due Date*</label>
+            <input type="date" formControlName="dueDate" required />
+            <div
+              class="form-error"
+              *ngIf="addFrm.dueDate.errors?.required && addFrm.dueDate.touched"
+            >
+              Due date is required
+            </div>
+          </div>
+        </div>
+        <!-- Submit -->
+        <div class="form-actions">
+          <div>
+            <button type="button" class="secondary-button">Cancel</button>
+          </div>
+          <div>
+            <button type="submit" [disabled]="!addForm.valid">
+              Save Patient
             </button>
-            <button *ngIf="row.get('sent')?.value" disabled>SMS Sent</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <button type="button" class="button-add-row" (click)="addRow()">
-      Add Row
-    </button>
-  </form>
-</div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Vaccination records -->
+    <div class="records-container" *ngIf="tab === 'view'" id="recordsSection">
+      <h2>All Vaccination Records</h2>
+      <!-- Filter box -->
+      <div class="filter-container">
+        <!-- Filter 1 -->
+        <div class="filter-group">
+          <label for="statusFilter">Filter by Status:</label>
+          <select id="statusFilter">
+            <option value="all">All Records</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="sent">Reminder Sent</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <!-- Filter 2 -->
+        <div class="filter-group">
+          <label for="vaccineFilter">Filter by Vaccine:</label>
+          <select id="vaccineFilter">
+            <option value="all">All Vaccines</option>
+            <option value="Anti-D">Anti-D</option>
+            <option value="COVID">COVID</option>
+            <option value="Flu">Flu</option>
+            <option value="HPV">HPV</option>
+            <option value="MMR">MMR</option>
+            <option value="Child">Child Schedule</option>
+          </select>
+        </div>
+        <!-- Search -->
+        <div class="filter-group">
+          <label for="searchPatient">Search:</label>
+          <input
+            type="text"
+            id="searchPatient"
+            placeholder="Search by name or NHI..."
+          />
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>NHI</th>
+            <th>Contact Number</th>
+            <th>Vaccine Type</th>
+            <th>Due Date</th>
+            <th>Reminder Status</th>
+            <th>Vaccinated Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="records.length">
+            <tr *ngFor="let record of records">
+              <td>{{ record.patientName }}</td>
+              <td>{{ record.nhiNumber }}</td>
+              <td>{{ record.contactNumber }}</td>
+              <td>{{ record.vaccineType }}</td>
+              <td>{{ record.dueDate | date : "yyyy/MM/dd" }}</td>
+              <td>
+                <span class="status-badge status-scheduled">{{
+                  record.reminderStatus
+                }}</span>
+              </td>
+              <td>{{ record.vaccinatedDate | date : "yyyy/MM/dd" }}</td>
+              <td>
+                <button class="edit-btn" (click)="onClickEditRecord(record)">
+                  Edit
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+      <!-- Table here -->
+      <div></div>
+    </div>
+
+    <!-- Edit box -->
+    <div class="form-container" *ngIf="tab === 'edit'" id="editPatientForm">
+      <h2>Edit Patient Vaccination Information</h2>
+      <!-- Forms -->
+      <form [formGroup]="editForm" (ngSubmit)="onSubmitEditForm()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editPatientName">Patient Name*</label>
+            <input type="text" formControlName="patientName" required />
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.patientName.errors?.required &&
+                editFrm.patientName.touched
+              "
+            >
+              Patient name is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editNhiNumber">NHI Number*</label>
+            <input
+              type="text"
+              formControlName="nhiNumber"
+              placeholder="e.g. ABC1234"
+              required
+            />
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.nhiNumber.errors?.required && editFrm.nhiNumber.touched
+              "
+            >
+              NHI number is required
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editContactNumber">Contact Number*</label>
+            <input
+              type="tel"
+              formControlName="contactNumber"
+              placeholder="e.g. 021 123 4567"
+              required
+            />
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.contactNumber.errors?.required &&
+                editFrm.contactNumber.touched
+              "
+            >
+              Contact number is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editVaccineType">Vaccine Type*</label>
+            <select formControlName="vaccineType" required>
+              <option value="" disabled selected>Select vaccine...</option>
+              <option value="Anti-D">Anti-D</option>
+              <option value="COVID">COVID</option>
+              <option value="Flu">Flu</option>
+              <option value="HPV2">HPV (2nd dose)</option>
+              <option value="HPV3">HPV (3rd dose)</option>
+              <option value="Measles">Measles</option>
+              <option value="Meningococcal">Meningococcal</option>
+              <option value="MMR">MMR</option>
+              <option value="Shingles">Shingles</option>
+              <option value="Child6wks">Child (6 wks)</option>
+              <option value="Child3mths">Child (3 mths)</option>
+              <option value="Child5mths">Child (5 mths)</option>
+              <option value="Child12mths">Child (12 mths)</option>
+              <option value="Child15mths">Child (15 mths)</option>
+              <option value="Child4yrs">Child (4 yrs)</option>
+              <option value="Child11-12yrs">Child (11-12yrs)</option>
+            </select>
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.vaccineType.errors?.required &&
+                editFrm.vaccineType.touched
+              "
+            >
+              Vaccine type is required
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editDueDate">Due Date*</label>
+            <input type="date" formControlName="dueDate" required />
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.dueDate.errors?.required && editFrm.dueDate.touched
+              "
+            >
+              Due date is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editReminderStatus">Reminder Status</label>
+            <input type="text" formControlName="reminderStatus" />
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.reminderStatus.errors?.required &&
+                editFrm.reminderStatus.touched
+              "
+            >
+              Reminder status is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editVaccinatedDate"
+              >Vaccinated Date (if completed)</label
+            >
+            <input type="date" formControlName="vaccinatedDate" />
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.vaccinatedDate.errors?.required &&
+                editFrm.vaccinatedDate.touched
+              "
+            >
+              Vaccinated date is required
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="form-actions">
+          <div>
+            <button
+              type="button"
+              class="secondary-button"
+              id="cancelEdit"
+              (click)="onClickCancel()"
+            >
+              Cancel
+            </button>
+          </div>
+          <div>
+            <button type="submit">Save Changes</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
