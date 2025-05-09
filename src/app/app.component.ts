@@ -47,7 +47,10 @@ export class AppComponent implements OnInit {
     this.addForm = this.fb.group({
       patientName: [null, Validators.required],
       nhiNumber: [null, Validators.required],
-      contactNumber: [null, Validators.required],
+      contactNumber: [
+        null,
+        [Validators.required, Validators.pattern(/^64(2\d{7,9})$/)],
+      ],
       vaccineType: [null, Validators.required],
       dueDate: [null, Validators.required],
     });
@@ -55,7 +58,10 @@ export class AppComponent implements OnInit {
       id: [null, Validators.required],
       patientName: [null, Validators.required],
       nhiNumber: [null, Validators.required],
-      contactNumber: [null, Validators.required],
+      contactNumber: [
+        null,
+        [Validators.required, Validators.pattern(/^64(2\d{7,9})$/)],
+      ],
       vaccineType: [null, Validators.required],
       dueDate: [null, Validators.required],
       reminderStatus: [null, Validators.required],

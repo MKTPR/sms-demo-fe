@@ -35,7 +35,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="patientName">Patient Name*</label>
-            <input type="text" formControlName="patientName" required />
+            <input type="text" formControlName="patientName" />
             <div
               class="form-error"
               *ngIf="
@@ -53,7 +53,6 @@
               type="text"
               formControlName="nhiNumber"
               placeholder="e.g. ABC1234"
-              required
             />
             <div
               class="form-error"
@@ -71,8 +70,7 @@
             <input
               type="tel"
               formControlName="contactNumber"
-              placeholder="e.g. 021 123 4567"
-              required
+              placeholder="e.g. 64211234567"
             />
             <div
               class="form-error"
@@ -83,11 +81,21 @@
             >
               Contact number is required
             </div>
+            <div
+              class="form-error"
+              *ngIf="
+                addFrm.contactNumber.errors?.pattern &&
+                addFrm.contactNumber.touched
+              "
+            >
+              Please enter a valid New Zealand mobile number starting with 64
+              (e.g., 64211234567).
+            </div>
           </div>
 
           <div class="form-group">
             <label for="vaccineType">Vaccine Type*</label>
-            <select formControlName="vaccineType" required>
+            <select formControlName="vaccineType">
               <option value="" disabled selected>Select vaccine...</option>
               <option value="Anti-D">Anti-D</option>
               <option value="COVID">COVID</option>
@@ -120,7 +128,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="dueDate">Due Date*</label>
-            <input type="date" formControlName="dueDate" required />
+            <input type="date" formControlName="dueDate" />
             <div
               class="form-error"
               *ngIf="addFrm.dueDate.errors?.required && addFrm.dueDate.touched"
@@ -229,7 +237,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="editPatientName">Patient Name*</label>
-            <input type="text" formControlName="patientName" required />
+            <input type="text" formControlName="patientName" />
             <div
               class="form-error"
               *ngIf="
@@ -247,7 +255,6 @@
               type="text"
               formControlName="nhiNumber"
               placeholder="e.g. ABC1234"
-              required
             />
             <div
               class="form-error"
@@ -266,8 +273,7 @@
             <input
               type="tel"
               formControlName="contactNumber"
-              placeholder="e.g. 021 123 4567"
-              required
+              placeholder="e.g. 64211234567"
             />
             <div
               class="form-error"
@@ -278,11 +284,21 @@
             >
               Contact number is required
             </div>
+            <div
+              class="form-error"
+              *ngIf="
+                editFrm.contactNumber.errors?.pattern &&
+                editFrm.contactNumber.touched
+              "
+            >
+              Please enter a valid New Zealand mobile number starting with 64
+              (e.g., 64211234567).
+            </div>
           </div>
 
           <div class="form-group">
             <label for="editVaccineType">Vaccine Type*</label>
-            <select formControlName="vaccineType" required>
+            <select formControlName="vaccineType">
               <option value="" disabled selected>Select vaccine...</option>
               <option value="Anti-D">Anti-D</option>
               <option value="COVID">COVID</option>
@@ -316,7 +332,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="editDueDate">Due Date*</label>
-            <input type="date" formControlName="dueDate" required />
+            <input type="date" formControlName="dueDate" />
             <div
               class="form-error"
               *ngIf="
