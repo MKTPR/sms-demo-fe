@@ -3,6 +3,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "noPropertyAccessFromIndexSignature": false,
+    "strict": false,
     "outDir": "./out-tsc/app",
     "types": [
       "node"
